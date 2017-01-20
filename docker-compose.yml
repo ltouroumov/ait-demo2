@@ -3,12 +3,15 @@ version: '2'
 
 services:
   pg-master:
-    build: '.'
+    build: './db'
     image: 'danieldent/postgres-replication'
     restart: 'always'
+    labels:
+      demo.role: "master"
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'demo'
       PGDATA: '/var/lib/postgresql/data/pgdata'
     volumes:
      - '/var/lib/postgresql/data'
@@ -16,9 +19,11 @@ services:
      - '5432'
 
   pg-slave:
-    build: '.'
+    build: './db'
     image: 'danieldent/postgres-replication'
     restart: 'always'
+    labels:
+      demo.role: "slave"
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
@@ -30,3 +35,18 @@ services:
      - '5432'
     links:
      - 'pg-master'
+
+  pg-admin:
+    image: fenglc/pgadmin4
+    volumes:
+        - /root/.pgadmin
+    ports: 
+        - "5050:5050"
+  
+  app:
+    build: './app'
+    privileged: true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    ports: 
+      - 3000:3000

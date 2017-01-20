@@ -1,0 +1,10 @@
+{% for container in containers %}
+{% if 'Up' in container.Status %}
+<tr class="success">
+{% else %}
+<tr class="danger">
+{% endif %}
+    <td>{{ container.Names | join(', ') }}</td>
+    <td>{{ container.NetworkSettings.Networks.demo2_default.IPAddress }}</td>
+</tr>
+{% endfor %}

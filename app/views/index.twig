@@ -1,0 +1,102 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+  <div class="col-md-4">
+    <h2>Active Servers</h2>
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody id="containers">
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-md-8">
+    <h2>Data</h2>
+
+    <form class="form-horizontal" id="servers">
+      <div class="form-group">
+        <label class="control-label col-md-2">Master IP</label>
+        <div class="col-md-10">
+          <input class="form-control" name="master" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-2">Slave IP</label>
+        <div class="col-md-10">
+          <input class="form-control" name="slave" />
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-10 col-md-offset-2">
+          <button type="submit" class="btn btn-block">Update</button>
+        </div>
+      </div>
+    </form>
+
+    <table class="table table-hover">
+      <thead>
+        <tr><th>Value</th></tr> 
+      </thead>
+      <tbody id="data"></tbody>
+    </table>
+
+
+    <form class="form-horizontal" id="value">
+      <div class="form-group">
+        <div class="col-md-10">
+          <input class="form-control" name="value" placeholder />
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-block">Add Value</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script type="text/javascript">
+    $(function() {
+      $('#servers').submit(function($evt) {
+        $evt.preventDefault();
+
+        $.post('/config', $('#servers').serializeObject());
+
+        return false;
+      });
+
+      $('#value').submit(function($evt) {
+        $evt.preventDefault();
+
+        $.post('/data', $('#value').serializeObject());
+
+        return false;
+      });
+
+      var cUpd = setInterval(function() {
+        $.get('/running')
+          .done(function(resp) {
+            $('#containers').html(resp);
+          })
+          .fail(function() {
+            clearInterval(cUpd);
+          });
+      }, 1000);
+
+      var dUpd = setInterval(function() {
+        $.get('/data')
+          .done(function(resp){
+            $('#data').html(resp);
+          })
+          .fail(function() {
+            clearInterval(dUpd);
+          });
+      }, 1000);
+    });
+  </script>
+{% endblock %}

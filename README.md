@@ -1,19 +1,17 @@
-# Postgres 9.6 Dockerized w/ Replication
+# AIT - Postgres replication demo
 
-Master/Slave Postgres Replication in 30 seconds.
+This repository contains a pre-configured docker image of `postgresql`  which supports streaming replication.
+Docker image build based on https://github.com/hakamadare/docker-postgres-replication.
 
-  * Quickstart: `docker-compose up`
-  * For production, use docker-compose, Kubernetes, Rancher, Tutum, other PaaS tooling, ... or roll your own.
-  * To see container environment variable requirements, see `docker-compose.yml`.
-  * To demonstrate multiple slaves:
-    * `docker-compose up`
-    * `docker-compose scale pg-slave=3`
+## Performing the demo
 
-## Notes
+  1. start all containers: `docker-compose up --build`
+  2. start more slaves: `docker-compose scale pg-slave=2`
+  2. access the mini web interface at http://localhost:3000
+  3. add some data (you can also interact with the servers directly using `docker exec -it <container> gosu postgres psql -d data`)
+  4. slay the master: `docker kill demo2_pg-master_1`
+  5. promote a slave: `docker exec demo2_pg-slave_1 /utils/promote.sh`
+  6. reconfigure slaves: `docker exec demo2_pg-slave_2 /utils/update.sh (./get-ip demo2_pg-slave_1)`
+  7. restart slaves: `docker restart demo2_pg-slave_2`
 
-   * No additional replication user is setup - the postgres admin user is used. This means the superuser credentials must be identical on the master and all slaves.
-   * setup-replication.sh is only executed when a container's data volume is first initialized.
-   * REPLICATE_FROM environment variable is only used during container initialization - if the master changes after the database has been initialized, you'll need to manually adjust the recovery.conf file in the slave containers' data volume.
-   * Configuration:
-     * PG_MAX_WAL_SENDERS 8 - Maximum number of slaves
-     * PG_WAL_KEEP_SEGMENTS 32 - See http://www.postgresql.org/docs/9.6/static/runtime-config-replication.html
+Slaves should now replicate from the new master.

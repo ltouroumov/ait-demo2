@@ -35,13 +35,6 @@ services:
      - '5432'
     links:
      - 'pg-master'
-
-  pg-admin:
-    image: fenglc/pgadmin4
-    volumes:
-        - /root/.pgadmin
-    ports: 
-        - "5050:5050"
   
   app:
     build: './app'
